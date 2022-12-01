@@ -27,6 +27,7 @@ app.get('/getToken', (req, res) => {
 
   // Serialize the token as a JWT
   var jwt = accessToken.toJwt();
+  console.log(jwt)
   return res.send(jwt);
 });
 

@@ -10,7 +10,9 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
-    "@react-navigation/native": "^6.0.13",
+    "@react-navigation/bottom-tabs": "^6.4.3",
+    "@react-navigation/native": "^6.0.16",
+    "@react-navigation/native-stack": "^6.9.4",
     "@react-navigation/stack": "^6.3.4",
     "react": "18.1.0",
     "react-native": "0.70.4",
@@ -21,6 +23,7 @@
     "react-native-safe-area-view": "^1.1.1",
     "react-native-screens": "^3.18.2",
     "react-native-twilio-video-webrtc": "https://github.com/blackuy/react-native-twilio-video-webrtc",
+    "react-native-vector-icons": "^9.2.0",
     "yarn": "^1.22.19"
   },
   "devDependencies": {

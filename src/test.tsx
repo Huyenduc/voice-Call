@@ -38,6 +38,8 @@ import {
   TwilioVideoParticipantView,
   TwilioVideo,
 } from 'react-native-twilio-video-webrtc';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MateriaLicons from 'react-native-vector-icons/MaterialIcons';
 
 const Stack = createStackNavigator();
 
@@ -48,6 +50,7 @@ interface Iprops {
 
 interface IinitialState {
   isAudioEnabled: boolean,
+  isVideoEnabled: boolean,
   status: string,
   participants: Map<any, any>,
   videoTracks: Map<any, any>,
@@ -58,6 +61,7 @@ interface IinitialState {
 
 const initialState: IinitialState = {
   isAudioEnabled: true,
+  isVideoEnabled: true,
   status: 'disconnected',
   participants: new Map(),
   videoTracks: new Map(),
@@ -66,20 +70,22 @@ const initialState: IinitialState = {
   token: '',
 };
 
-const AppContext = React.createContext<Iprops>({props:initialState,setProps:null});
+const AppContext = React.createContext<Iprops>({ props: initialState, setProps: null });
 const dimensions = Dimensions.get('window');
 
 const App = () => {
   const [props, setProps] = useState(initialState);
-  console.log(API_URL)
+
+  // console.log("nxeeww", props.token)
+  // console.log("new", API_URL)
 
 
   return (
     <>
       <StatusBar barStyle="dark-content" />
       <AppContext.Provider value={{ props, setProps }}>
-        <NavigationContainer>
-          <Stack.Navigator>
+        <NavigationContainer >
+          <Stack.Navigator screenOptions={{headerShown:false}}>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Video Call" component={VideoCallScreen} />
           </Stack.Navigator>
@@ -197,6 +203,7 @@ const HomeScreen = ({ navigation }: any) => {
                   fetch(`${API_URL}/getToken?userName=${props.userName}`)
                     .then((response) => {
                       if (response.ok) {
+                        // console.log(response.text().then())
                         response.text().then((jwt) => {
                           setProps({ ...props, token: jwt });
                           navigation.navigate('Video Call');
@@ -225,13 +232,32 @@ const HomeScreen = ({ navigation }: any) => {
 
 const VideoCallScreen = ({ navigation }: any) => {
   const twilioVideo = useRef<any>(null);
+  console.log("ok1", twilioVideo)
+
+  const [open, setOpen] = useState(true)
+
   const { props, setProps } = useContext(AppContext);
 
   useEffect(() => {
     twilioVideo.current.connect({
       roomName: props.roomName,
-      accessToken: props.token,
+      accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzkzOTgwZWRkYTFlYTNjYzE0MmMyNTI1MTEzNDEwZjg3LTE2Njk4ODc4NTYiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJhIiwidmlkZW8iOnt9fSwiaWF0IjoxNjY5ODg3ODU2LCJleHAiOjE2Njk4OTE0NTYsImlzcyI6IlNLOTM5ODBlZGRhMWVhM2NjMTQyYzI1MjUxMTM0MTBmODciLCJzdWIiOiJBQzgxZDVhZWE5N2E4MzBiNDAxNGY3MzBhNjk3M2RmMzQxIn0.tNXK_t6sRnvpkPknGH9QelbubGdoe_GUOlnzmIFjtQk',
+      // enableVideo:videoLocal,
+      region: 'gll',
+      bandwidthProfile: {
+        video: {
+          mode: 'grid',
+          maxSubscriptionBitrate: 2500000,
+          dominantSpeakerPriority: 'standard'
+        }
+      },
+      dominantSpeaker: true,
+      dominantSpeakerPriority: 'high',
+      maxAudioBitrate: 16000, //For music remove this line
+      preferredVideoCodecs: [{ codec: 'VP8', simulcast: true }],
+      networkQuality: { local: 1, remote: 2 }
     });
+    console.log("ok", twilioVideo.current)
     setProps({ ...props, status: 'connecting' });
     return () => {
       _onEndButtonPress();
@@ -252,42 +278,79 @@ const VideoCallScreen = ({ navigation }: any) => {
 
   const _onFlipButtonPress = () => {
     twilioVideo.current.flipCamera();
+
   };
+
+  const _onDisableVideoButtonPress = () => {
+    twilioVideo.current.setLocalVideoEnabled(!props.isVideoEnabled).then
+      ((isEnabled: any) => setProps({ isVideoEnabled: isEnabled }))
+  }
 
   return (
     <View style={styles.callContainer}>
-      {(props.status === 'connected' || props.status === 'connecting') && (
-        <View style={styles.callWrapper}>
-          {props.status === 'connected' && (
-            <View style={styles.remoteGrid}>
-              {Array.from(props.videoTracks, ([trackSid, trackIdentifier]) => (
-                <TwilioVideoParticipantView
-                  style={styles.remoteVideo}
-                  key={trackSid}
-                  trackIdentifier={trackIdentifier}
-                />
-              ))}
-            </View>
-          )}
-        </View>
-      )}
-      <View style={styles.optionsContainer}>
-        <TouchableOpacity style={styles.button} onPress={_onEndButtonPress}>
-          <Text style={styles.buttonText}>End</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={_onMuteButtonPress}>
-          <Text style={styles.buttonText}>
-            {props.isAudioEnabled ? 'Mute' : 'Unmute'}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={_onFlipButtonPress}>
-          <Text style={styles.buttonText}>Flip</Text>
-        </TouchableOpacity>
+
+      <View style={{ flex: 1, marginBottom: '10%' }}>
+        {(props.status === 'connected' || props.status === 'connecting') && (
+          <View style={styles.callWrapper}>
+            {props.status === 'connected' && (
+              <View style={styles.remoteGrid}>
+                {Array.from(props.videoTracks, ([trackSid, trackIdentifier]) => (
+                  <TwilioVideoParticipantView
+                    style={styles.remoteVideo}
+                    key={trackSid}
+                    trackIdentifier={trackIdentifier}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+
+        <TwilioVideoLocalView
+          enabled={props.status === 'connected'}
+
+          applyZOrder={true}
+          style={styles.localVideo}
+        />
+
       </View>
-      <TwilioVideoLocalView
-        enabled={props.status === 'connected'}
-        style={styles.localVideo}
-      />
+
+
+      {
+        open ?
+          <View style={styles.optionsContainer}>
+            <View>
+            <TouchableOpacity onPress={() => setOpen(!open)} >
+              <FontAwesome name="minus" size={30} color="red" />
+            </TouchableOpacity>
+            </View>
+            <View style={styles.optionsbutton}>
+              <TouchableOpacity style={[styles.button, { backgroundColor: '#ed3b2d', marginLeft: 10 }]} onPress={_onEndButtonPress}>
+
+                <MateriaLicons name="call-end" size={30} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={_onMuteButtonPress}>
+                <MateriaLicons name={props.isAudioEnabled ? 'mic' : 'mic-off'} size={30} color="white" />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.button} onPress={_onDisableVideoButtonPress}>
+                <MateriaLicons name={props.isVideoEnabled ? 'videocam' : 'videocam-off'} size={30} color="white" />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={[styles.button, { marginRight: 10 }]} onPress={_onFlipButtonPress}>
+                {/* <Text style={styles.buttonText}>Flip</Text> */}
+                <MateriaLicons name="flip-camera-ios" size={30} color="white" />
+              </TouchableOpacity>
+            </View>
+
+          </View> :
+          <View>
+            <TouchableOpacity onPress={() => setOpen(!open)} >
+              <FontAwesome name="minus" size={30} color="red" />
+            </TouchableOpacity>
+          </View>
+      }
+
       <TwilioVideo
         ref={twilioVideo}
         onRoomDidConnect={() => {
@@ -349,12 +412,13 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
   },
   button: {
     padding: 10,
-    backgroundColor: 'blue',
-    borderRadius: 5,
+    backgroundColor: '#4a4a4a',
+    borderRadius: 50,
   },
   buttonText: {
     color: 'white',
@@ -380,18 +444,31 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   localVideo: {
+    borderRadius: 30,
     position: 'absolute',
-    right: 5,
-    bottom: 50,
+    right: 20,
+    top: 20,
     width: dimensions.width / 4,
     height: dimensions.height / 4,
   },
-  optionsContainer: {
+
+  optionsContainer:{
+    backgroundColor: '#333333',
+    height:"12%",
+    
+    
+  },
+  optionsbutton: {
+    
+    flex: 1,
+    padding: 20,
     position: 'absolute',
     paddingHorizontal: 10,
     left: 0,
     right: 0,
-    bottom: 5,
+    bottom: 0,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
