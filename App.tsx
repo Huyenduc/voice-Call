@@ -6,6 +6,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 // import { Icon } from '@rneui/themed';
 
+import  Notification from './src/notification'
+
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const App = () => {
@@ -43,7 +45,8 @@ const App = () => {
   //   );
   // }
   return (
-    <Test />
+    // <Test />
+    <Notification/>
     // <NavigationContainer>
     //   <Stack.Navigator screenOptions={{headerShown:false}}>
     //     <Stack.Screen name="Home" component={MyTabs} />

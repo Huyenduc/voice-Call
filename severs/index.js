@@ -8,6 +8,15 @@ const VideoGrant = AccessToken.VideoGrant;
 
 const app = express();
 
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+
 app.get('/getToken', (req, res) => {
   if (!req.query || !req.query.userName) {
     return res.status(400).send('Username parameter is required');
@@ -30,6 +39,41 @@ app.get('/getToken', (req, res) => {
   console.log(jwt)
   return res.send(jwt);
 });
+
+app.get('/notification',async (rep,res)=>{
+  const a = await admin.messaging().send({
+    notification: {
+      title: "Notification Title",
+      body: "Notification Body ",
+    },
+    "android":{
+      "notification":{
+        "sound":"default"
+      }
+    },
+    'apns': {
+      'payload': {
+        'aps': {
+          // contentAvailable: true,
+          "sound":"default"
+        },
+      },
+      // headers: {
+      //   'apns-push-type': 'background',
+      //   'apns-priority': '5',
+      //   'apns-topic': '', // your app bundle identifier
+      // },
+    },
+    //must include token, topic, or condition
+    token: 'eH-7TTO_QjOJM7mresUSES:APA91bGS3gumICNhjG95NB2P5TJTwGU0QrMQifI5RJKZrpvUIr9FVmqk_L58aGT9ebOFQREoffXlaUZElRPRIpyX2ayS-T2IgochUTDmv5fgdl16R8_TubhcGaDtGda3P2URdHOpwWb2'
+    //topic: //notification topic
+    //condition: //notification condition
+  }).then(res =>console.log(JSON.stringify(res)))
+
+  console.log(a)
+  return res.status(200).send("ok")
+}
+  )
 
 app.listen(process.env.PORT, () =>
   console.log(`Server listening on port ${process.env.PORT}!`),

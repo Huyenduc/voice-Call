@@ -10,12 +10,15 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@react-native-firebase/app": "^16.4.6",
+    "@react-native-firebase/messaging": "^16.4.6",
     "@react-navigation/bottom-tabs": "^6.4.3",
     "@react-navigation/native": "^6.0.16",
     "@react-navigation/native-stack": "^6.9.4",
     "@react-navigation/stack": "^6.3.4",
     "react": "18.1.0",
     "react-native": "0.70.4",
+    "react-native-callkeep": "git+https://github.com/react-native-webrtc/react-native-callkeep#4b1fa98a685f6502d151875138b7c81baf1ec680",
     "react-native-dotenv": "^3.4.2",
     "react-native-gesture-handler": "^2.8.0",
     "react-native-permissions": "^3.6.1",
@@ -24,6 +27,7 @@
     "react-native-screens": "^3.18.2",
     "react-native-twilio-video-webrtc": "https://github.com/blackuy/react-native-twilio-video-webrtc",
     "react-native-vector-icons": "^9.2.0",
+    "uuid": "^9.0.0",
     "yarn": "^1.22.19"
   },
   "devDependencies": {

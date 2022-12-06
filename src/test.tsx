@@ -19,6 +19,7 @@ import {
   Platform,
   ScrollView,
   Dimensions,
+  useColorScheme
 } from 'react-native';
 
 import { API_URL } from '@env';
@@ -72,12 +73,11 @@ const initialState: IinitialState = {
 
 const AppContext = React.createContext<Iprops>({ props: initialState, setProps: null });
 const dimensions = Dimensions.get('window');
-
 const App = () => {
   const [props, setProps] = useState(initialState);
 
   // console.log("nxeeww", props.token)
-  // console.log("new", API_URL)
+  console.log("news", API_URL)
 
 
   return (
@@ -85,7 +85,7 @@ const App = () => {
       <StatusBar barStyle="dark-content" />
       <AppContext.Provider value={{ props, setProps }}>
         <NavigationContainer >
-          <Stack.Navigator screenOptions={{headerShown:false}}>
+          <Stack.Navigator screenOptions={{headerShown:false}} >
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Video Call" component={VideoCallScreen} />
           </Stack.Navigator>
@@ -200,11 +200,12 @@ const HomeScreen = ({ navigation }: any) => {
               style={styles.button}
               onPress={() => {
                 _checkPermissions(() => {
-                  fetch(`${API_URL}/getToken?userName=${props.userName}`)
+                  fetch(`${API_URL}api/rooms/getToken/hj`)
                     .then((response) => {
                       if (response.ok) {
-                        // console.log(response.text().then())
                         response.text().then((jwt) => {
+                        console.log(jwt)
+
                           setProps({ ...props, token: jwt });
                           navigation.navigate('Video Call');
                           return true;
@@ -232,7 +233,7 @@ const HomeScreen = ({ navigation }: any) => {
 
 const VideoCallScreen = ({ navigation }: any) => {
   const twilioVideo = useRef<any>(null);
-  console.log("ok1", twilioVideo)
+  // console.log("ok1", twilioVideo)
 
   const [open, setOpen] = useState(true)
 
@@ -240,8 +241,8 @@ const VideoCallScreen = ({ navigation }: any) => {
 
   useEffect(() => {
     twilioVideo.current.connect({
-      roomName: props.roomName,
-      accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzkzOTgwZWRkYTFlYTNjYzE0MmMyNTI1MTEzNDEwZjg3LTE2Njk4ODc4NTYiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJhIiwidmlkZW8iOnt9fSwiaWF0IjoxNjY5ODg3ODU2LCJleHAiOjE2Njk4OTE0NTYsImlzcyI6IlNLOTM5ODBlZGRhMWVhM2NjMTQyYzI1MjUxMTM0MTBmODciLCJzdWIiOiJBQzgxZDVhZWE5N2E4MzBiNDAxNGY3MzBhNjk3M2RmMzQxIn0.tNXK_t6sRnvpkPknGH9QelbubGdoe_GUOlnzmIFjtQk',
+      // roomName: props.roomName,
+      accessToken:props.token,
       // enableVideo:videoLocal,
       region: 'gll',
       bandwidthProfile: {
@@ -257,7 +258,7 @@ const VideoCallScreen = ({ navigation }: any) => {
       preferredVideoCodecs: [{ codec: 'VP8', simulcast: true }],
       networkQuality: { local: 1, remote: 2 }
     });
-    console.log("ok", twilioVideo.current)
+    // console.log("ok", twilioVideo.current)
     setProps({ ...props, status: 'connecting' });
     return () => {
       _onEndButtonPress();
@@ -282,8 +283,9 @@ const VideoCallScreen = ({ navigation }: any) => {
   };
 
   const _onDisableVideoButtonPress = () => {
-    twilioVideo.current.setLocalVideoEnabled(!props.isVideoEnabled).then
-      ((isEnabled: any) => setProps({ isVideoEnabled: isEnabled }))
+    twilioVideo.current
+    .setLocalVideoEnabled(!props.isVideoEnabled)
+    .then((isEnabled: any) => setProps({...props, isVideoEnabled: isEnabled }))
   }
 
   return (
@@ -447,7 +449,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     position: 'absolute',
     right: 20,
-    top: 20,
+    top: 30,
     width: dimensions.width / 4,
     height: dimensions.height / 4,
   },
