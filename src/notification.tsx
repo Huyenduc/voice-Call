@@ -30,9 +30,11 @@ const Notification = () => {
             await requestUserPermission();
             await getToken();
             messaging().onNotificationOpenedApp(remoteMessage =>{
+                
                 Alert.alert("Open notification "    )
             })
             const unsubscribe = messaging().onMessage(async remoteMessage  => {
+                console.log(remoteMessage)
                 Alert.alert('A new FCM message arrived!');
               });
           

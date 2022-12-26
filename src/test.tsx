@@ -77,7 +77,7 @@ const App = () => {
   const [props, setProps] = useState(initialState);
 
   // console.log("nxeeww", props.token)
-  console.log("news", API_URL)
+  console.log("ncews", API_URL)
 
 
   return (
@@ -200,7 +200,7 @@ const HomeScreen = ({ navigation }: any) => {
               style={styles.button}
               onPress={() => {
                 _checkPermissions(() => {
-                  fetch(`${API_URL}api/rooms/getToken/hj`)
+                  fetch(`${API_URL}/getToken?userName=${props.userName}`)
                     .then((response) => {
                       if (response.ok) {
                         response.text().then((jwt) => {
@@ -233,15 +233,15 @@ const HomeScreen = ({ navigation }: any) => {
 
 const VideoCallScreen = ({ navigation }: any) => {
   const twilioVideo = useRef<any>(null);
-  // console.log("ok1", twilioVideo)
 
   const [open, setOpen] = useState(true)
 
   const { props, setProps } = useContext(AppContext);
+  console.log("ok1", props.videoTracks)
 
   useEffect(() => {
     twilioVideo.current.connect({
-      // roomName: props.roomName,
+      roomName: props.roomName,
       accessToken:props.token,
       // enableVideo:videoLocal,
       region: 'gll',
@@ -386,8 +386,11 @@ const VideoCallScreen = ({ navigation }: any) => {
         }}
         onParticipantRemovedVideoTrack={({ track }) => {
           const videoTracks = props.videoTracks;
+          console.log("ss",videoTracks)
           videoTracks.delete(track.trackSid);
           setProps({ ...props, videoTracks });
+          console.log("ss2",videoTracks)
+
         }}
       />
     </View>
