@@ -17,58 +17,27 @@ admin.initializeApp({
 });
 
 
-app.get('/getToken', (req, res) => {
-  if (!req.query || !req.query.userName) {
-    return res.status(400).send('Username parameter is required');
-  }
-  const accessToken = new AccessToken(
-    process.env.ACCOUNT_SID,
-    process.env.API_KEY_SID,
-    process.env.API_KEY_SECRET,
-  );
-
-  // Set the Identity of this token
-  accessToken.identity = req.query.userName;
-
-  // Grant access to Video
-  var grant = new VideoGrant();
-  accessToken.addGrant(grant);
-
-  // Serialize the token as a JWT
-  var jwt = accessToken.toJwt();
-  console.log(jwt)
-  return res.send(jwt);
-});
-
 app.get('/notification',async (rep,res)=>{
-  const a = await admin.messaging().send({
-    notification: {
-      title: "Notification Title",
-      body: "Notification Body ",
-    },
-    "android":{
-      "notification":{
-        "sound":"default"
-      }
-    },
-    'apns': {
-      'payload': {
-        'aps': {
-          // contentAvailable: true,
-          "sound":"default"
-        },
+  const a = await admin.messaging().sendToDevice(
+    [
+      'emt7I0oCT8Wv6tmMMisGzu:APA91bG4TKO2UmVjnaFzc_Rirc1wH9bVYEhrQ9L8Q4U3pkjIqGmc-UEeBErh6uk94hAsKFf3HpWYJzc5TOQe9eqpzrIHJ6SMjh_yN_jnbazALn-S5uffj82GCrQkSsZWOwbn94-cfxzF',
+    // 'cLgZfB9zR824iZhk5ipU1Y:APA91bGvkDdq96gLwzDeB9jAlDdbceXOCAG5GvRGrHY2smTfzlQW0WpHUST087GBtBW-pol-z9WiaUmIjO4kx0H1hroTnN34v8mc1UM7-R7F92wg4D9C4Px_XrbSPrLWd_2tmY-0MZaT',
+    // 'fE5Ym7YYRsyIhuSX8lRjsl:APA91bEN_2XThYN6o7rKUfl0eyibr62NcBFeTU6FGyyT6njKLMMOKf8fT2uuk842C7WjaopZkK2z9Lhsprqvoi1xXr9h43hxNaiGMVHofgwwhpqbIYV_xK7ntw-du-EAlR70sKPKIidr'
+  ], // device fcm tokens...
+    {
+      data: {
+        // owner: JSON.stringify(owner),
+        // user: JSON.stringify(user),
+        // picture: JSON.stringify(picture),
       },
-      // headers: {
-      //   'apns-push-type': 'background',
-      //   'apns-priority': '5',
-      //   'apns-topic': '', // your app bundle identifier
-      // },
     },
-    //must include token, topic, or condition
-    token: 'eH-7TTO_QjOJM7mresUSES:APA91bGS3gumICNhjG95NB2P5TJTwGU0QrMQifI5RJKZrpvUIr9FVmqk_L58aGT9ebOFQREoffXlaUZElRPRIpyX2ayS-T2IgochUTDmv5fgdl16R8_TubhcGaDtGda3P2URdHOpwWb2'
-    //topic: //notification topic
-    //condition: //notification condition
-  }).then(res =>console.log(JSON.stringify(res)))
+    {
+      // Required for background/quit data-only messages on iOS
+      contentAvailable: true,
+      // Required for background/quit data-only messages on Android
+      priority: 'high',
+    },
+  ).then(res =>console.log(JSON.stringify(res)))
 
   console.log(a)
   return res.status(200).send("ok")
